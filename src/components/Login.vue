@@ -16,7 +16,7 @@ export default defineComponent({
     FloatLabel,
     Password
   },
-  
+
   setup() {
     const toast = useToast();
     const document = ref<string>("");
@@ -35,8 +35,8 @@ export default defineComponent({
         console.error("Error at user login!", error);
         if (axios.isAxiosError(error)) {
           const axiosError = error as AxiosError;
-          if (axiosError.response?.status === 409) {
-            errorMessage.value = "User with this e-mail already exists!";
+          if (axiosError.response?.status === 404) {
+            errorMessage.value = "Usuário não encontrado";
           } else {
             errorMessage.value = "Error at user register!";
           }
@@ -51,15 +51,25 @@ export default defineComponent({
       }
     };
 
-    const goToHome = () => {
-        router.push("/")
+    const goToRegister = () => {
+      router.push("Register")
+    };
+
+    const goToForget = () => {
+      router.push("Forget")
     }
+
+    const goToHome = () => {
+      router.push("/")
+    };
 
     return {
       document,
       password,
       login,
       goToHome,
+      goToRegister,
+      goToForget,
       errorMessage,
     };
   },
@@ -105,9 +115,8 @@ export default defineComponent({
           </FloatLabel>
 
           <div class="link-login">
-            <a class="a-login" href="registro.html">Cadastre-se</a>
-            <a class="a-login" href="recuperarSenha.html"
-              >Esqueci minha senha</a
+            <a class="a-login" @click="goToRegister">Cadastre-se</a>
+            <a class="a-login" @click="goToForget">Esqueci minha senha</a
             >
           </div>
 
