@@ -33,6 +33,7 @@ export default defineComponent({
     const password = ref<string>("");
     const confirmPassword = ref<string>("");
     const errorMessage = ref<string>("");
+    const userType = 1;
 
     const formatDocument = (document: string): string => {
       return document
@@ -58,8 +59,9 @@ export default defineComponent({
         const payload = {
           completeName,
           email,
-          formatDocument,
+          formatedDocument,
           password,
+          userType,
         };
 
         const response = await apiClient.post("/auth/register", { payload });
@@ -68,6 +70,7 @@ export default defineComponent({
         localStorage.setItem("token", token);
         const decodedToken = jwtDecode<CustomJwtPayload>(token);
         localStorage.setItem("userType", decodedToken.type.toString());
+        goToList();
       } catch (error) {
         console.error("Error at user register!", error);
         if (axios.isAxiosError(error)) {
@@ -89,13 +92,7 @@ export default defineComponent({
     };
 
     const goToList = () => {
-      const type = localStorage.getItem("userType");
-
-      if (type === "1") {
-        router.push("PatientList");
-      } else {
-        router.push("DoctorList");
-      }
+      router.push("PatientList")
     };
 
     const goToHome = () => {
@@ -120,6 +117,7 @@ export default defineComponent({
 
 <template>
   <div id="pagina-registro">
+    <Toast position="top-left" />
     <main id="bloco-registro">
       <h1 class="titulo">Registre-se</h1>
       <section id="box-form-registro">

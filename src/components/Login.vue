@@ -5,6 +5,8 @@ import apiClient from "../axiosConfig";
 import { Button, FloatLabel, InputText, Password, Toast, useToast } from "primevue";
 import router from "../router/router";
 import 'primeicons/primeicons.css'
+import { jwtDecode } from "jwt-decode";
+import type CustomJwtPayload from "../interfaces/CustomJwtPayload";
 
 
 export default defineComponent({
@@ -23,14 +25,28 @@ export default defineComponent({
     const password = ref<string>("");
     const errorMessage = ref<string>("");
 
+    const formatDocument = (document: string): string => {
+      return document
+        .replace(/\D/g, "")
+        .replace(/(\d{3})(\d)/, "$1.$2")
+        .replace(/(\d{3})(\d)/, "$1.$2")
+        .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+    };
+
     const login = async () => {
       try {
         const response = await apiClient.post("/auth/login", {
-          document: document.value,
+          document: formatDocument(document.value),
           password: password.value,
         });
 
-        localStorage.setItem("token", response.data.token);
+        const token = response.data.token;
+        localStorage.setItem("token", token);
+
+        const decodedToken = jwtDecode<CustomJwtPayload>(token);
+        localStorage.setItem("userType", decodedToken.type.toString());
+        
+        goToList();
       } catch (error) {
         console.error("Error at user login!", error);
         if (axios.isAxiosError(error)) {
@@ -61,6 +77,16 @@ export default defineComponent({
 
     const goToHome = () => {
       router.push("/")
+    };
+
+    const goToList = () => {
+      const type = localStorage.getItem("userType");
+
+      if (type === "1") {
+        router.push("PatientList");
+      } else {
+        router.push("DoctorList");
+      }
     };
 
     return {
